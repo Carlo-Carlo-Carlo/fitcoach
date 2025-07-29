@@ -368,13 +368,6 @@ Réponds comme un coach sportif bienveillant. Pose une question de suivi, donne 
 ))}
 
 
-        
-{isTyping && (
-  <div style={{ fontStyle: 'italic', color: 'gray', textAlign: 'center', marginBottom: '10px' }}>
-    FitCoach écrit...
-  </div>
-)}
-
         {isGenerating && (
   <div style={{
     textAlign: 'center',
