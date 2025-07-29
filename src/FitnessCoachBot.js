@@ -347,32 +347,55 @@ Réponds comme un coach sportif bienveillant. Pose une question de suivi, donne 
 
 
       <div style={{ flex: 1, overflowY: 'auto', marginBottom: '10px' }}>
-        {messages.map((msg) => (
-          <div key={msg.id} style={{
-            display: 'flex',
-            justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start',
-            marginBottom: '8px'
-          }}>
-            <div style={{
-              backgroundColor: msg.type === 'user' ? '#4f46e5' : '#f3f4f6',
-              color: msg.type === 'user' ? 'white' : 'black',
-              padding: '10px 15px',
-              borderRadius: '20px',
-              maxWidth: '70%',
-              whiteSpace: 'pre-wrap'
-            }}>
-              {msg.text}
-              <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.6 }}>{msg.time}</div>
-            </div>
-            {isGenerating && (
-  <div style={{ textAlign: 'center', marginBottom: '10px', fontStyle: 'italic', color: '#6b7280' }}>
+       {messages.map((msg) => (
+  <div key={msg.id} style={{
+    display: 'flex',
+    justifyContent: msg.type === 'user' ? 'flex-end' : 'flex-start',
+    marginBottom: '8px'
+  }}>
+    <div style={{
+      backgroundColor: msg.type === 'user' ? '#4f46e5' : '#f3f4f6',
+      color: msg.type === 'user' ? 'white' : 'black',
+      padding: '10px 15px',
+      borderRadius: '20px',
+      maxWidth: '70%',
+      whiteSpace: 'pre-wrap'
+    }}>
+      {msg.text}
+      <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.6 }}>{msg.time}</div>
+    </div>
+  </div>
+))}
+
+
+        
+{isTyping && (
+  <div style={{ fontStyle: 'italic', color: 'gray', textAlign: 'center', marginBottom: '10px' }}>
+    FitCoach écrit...
+  </div>
+)}
+
+        {isGenerating && (
+  <div style={{
+    textAlign: 'center',
+    marginBottom: '10px',
+    fontStyle: 'italic',
+    color: '#6b7280'
+  }}>
     ⏳ FitCoach prépare ton programme personnalisé... un instant !
   </div>
 )}
 
-          </div>
-        ))}
-        {isTyping && <div style={{ fontStyle: 'italic', color: 'gray' }}>FitCoach écrit...</div>}
+{isTyping && (
+  <div style={{
+    fontStyle: 'italic',
+    color: 'gray',
+    textAlign: 'center',
+    marginBottom: '10px'
+  }}>
+    FitCoach écrit...
+  </div>
+)}
         <div ref={messagesEndRef} />
       </div>
 
