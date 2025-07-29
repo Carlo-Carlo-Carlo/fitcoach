@@ -13,15 +13,30 @@ const callOpenAI = async (userMessage) => {
         messages: [
           {
             role: "system",
-            content: `Tu es un coach sportif bienveillant, motivant et intelligent. Ton style est simple, direct, accessible. Tu aides des personnes à rester motivées, corriger leur posture, éviter les blessures et adapter leur programme à leur emploi du temps.`,
+            content: `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. Tu es le meilleur coach sportif et le meilleur nutrionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
+
+Tu es bienveillant, motivant et intelligent. Ton style est simple, direct, accessible.
+
+Tu aides des personnes à rester motivées, corriger leur posture, éviter les blessures et adapter leur programme à leur emploi du temps.
+
+Tu es à l'écoute, positif et complice. Tu donnes des conseils simples, efficaces et personnalisés.
+
+Tu t’adaptes au langage de ton interlocuteur : tu peux être sérieux, drôle, complice ou plus factuel selon le contexte. Tu as un style humain, simple, direct et accessible. Tu t’adaptes au ton de ton interlocuteur : complice, sérieux, drôle ou factuel, selon la situation.
+
+Tu poses des questions si besoin, tu sais expliquer clairement des notions comme le métabolisme, la balance énergétique ou les macronutriments.
+
+Ne réponds pas de façon robotique. Tes réponses sont vivantes, chaleureuses, engageantes. Tu peux utiliser des emojis si cela rend la réponse plus conviviale.
+
+Si la question sort du champ sport ou nutrition, indique gentiment que ce n’est pas ton domaine.
+`,
           },
           {
             role: "user",
             content: userMessage,
           },
         ],
-        max_tokens: 800,
-        temperature: 0.85,
+        max_tokens: 900,
+        temperature: 0.88,
       }),
     });
 
@@ -51,6 +66,8 @@ const FitnessCoachBot = () => {
   const [currentStep, setCurrentStep] = useState('name');
   const [isTyping, setIsTyping] = useState(false);
   const [theme, setTheme] = useState(localStorage.getItem('fitcoach_theme') || 'light');
+  const [isGenerating, setIsGenerating] = useState(false);
+
 
 
   const messagesEndRef = useRef(null);
@@ -106,6 +123,8 @@ useEffect(() => {
 
 
 const generateAIPersonalPlan = async () => {
+  setIsGenerating(true); // on démarre le chargement
+
   const { name, age, gender, weight, height, lifestyle } = userProfile;
 
   const userPrompt = `
@@ -118,11 +137,14 @@ Voici les données de l'utilisateur :
 - mode de vie : ${lifestyle}
 
 Propose un programme de remise en forme simple et adapté, avec des conseils de nutrition, sans jargon technique. Tu peux donner des encouragements aussi.
-`;
+  `;
 
   const aiResponse = await callOpenAI(userPrompt);
   addBotMessage(aiResponse);
+
+  setIsGenerating(false); // on arrête le chargement
 };
+
 
 
   const handleStepResponse = async (message) => {
@@ -232,13 +254,11 @@ if (/bitch|pute|enculé|merde|fuck/i.test(lowerMessage)) {
 case 'completed':
   if (lowerMessage.includes('motivation')) {
     addBotMessage(`💪 ${userProfile.name}, tu es plus fort que tu ne le penses !`);
-  } else if (lowerMessage.includes('programme') || lowerMessage.includes('recommence')) {
-    setCurrentStep('name');
-    setUserProfile({
-      name: '', age: '', weight: '', height: '', gender: '', lifestyle: '', goals: [], experience: '', timeAvailable: ''
-    });
-    addBotMessage("Très bien, recommençons ton programme. Quel est ton prénom ?");
-  } else {
+ } else if (lowerMessage.includes('programme') || lowerMessage.includes('recommence')) {
+  addBotMessage("📋 Super, je te prépare un nouveau programme adapté à ton profil");
+  generateAIPersonalPlan();
+}
+ else {
     const userInfo = `
 L'utilisateur s'appelle ${userProfile.name}, a ${userProfile.age} ans, est ${userProfile.gender}, mesure ${userProfile.height} cm, pèse ${userProfile.weight} kg, a un mode de vie ${userProfile.lifestyle}, un niveau ${userProfile.experience}, et des objectifs : ${userProfile.goals.join(', ')}. 
 Il vient de dire : "${message}".
@@ -344,6 +364,12 @@ Réponds comme un coach sportif bienveillant. Pose une question de suivi, donne 
               {msg.text}
               <div style={{ fontSize: '10px', marginTop: '4px', opacity: 0.6 }}>{msg.time}</div>
             </div>
+            {isGenerating && (
+  <div style={{ textAlign: 'center', marginBottom: '10px', fontStyle: 'italic', color: '#6b7280' }}>
+    ⏳ FitCoach prépare ton programme personnalisé... un instant !
+  </div>
+)}
+
           </div>
         ))}
         {isTyping && <div style={{ fontStyle: 'italic', color: 'gray' }}>FitCoach écrit...</div>}
