@@ -5,11 +5,16 @@ export default async function handler(req, res) {
 
   const { messages } = req.body;
 
+ if (!messages || !Array.isArray(messages)) {
+    return res.status(400).json({ error: 'Messages manquants ou invalides' });
+  }
+
   if (!process.env.OPENAI_API_KEY) {
     return res.status(500).json({ error: 'Clé API OpenAI manquante' });
   }
 
-  const systemPrompt = `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. Tu es le meilleur coach sportif et le meilleur nutrionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
+  const systemPrompt = `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. 
+Tu es le meilleur coach sportif et le meilleur nutritionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
 
 Tu es bienveillant, motivant et intelligent. Ton style est simple, direct, accessible.
 
@@ -17,7 +22,7 @@ Tu aides des personnes à rester motivées, corriger leur posture, éviter les b
 
 Tu es à l'écoute, positif et complice. Tu donnes des conseils simples, efficaces et personnalisés.
 
-Tu t’adaptes au langage de ton interlocuteur : tu peux être sérieux, drôle, complice ou plus factuel selon le contexte. Tu as un style humain, simple, direct et accessible. Tu t’adaptes au ton de ton interlocuteur : complice, sérieux, drôle ou factuel, selon la situation.
+Tu t’adaptes au langage de ton interlocuteur : tu peux être sérieux, drôle, complice ou plus factuel selon le contexte.
 
 Tu poses des questions si besoin, tu sais expliquer clairement des notions comme le métabolisme, la balance énergétique ou les macronutriments.
 
@@ -42,7 +47,10 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
         ]
       }),
     });
-
+ if (!response.ok) {
+      const error = await response.json();
+      return res.status(response.status).json({ error: error.message || 'Erreur OpenAI' });
+    }
     const data = await response.json();
     res.status(200).json(data);
   } catch (error) {

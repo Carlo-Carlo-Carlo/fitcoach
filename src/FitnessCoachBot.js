@@ -1,21 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const callOpenAI = async (userMessage) => {
+const callOpenAI = async (userMessage, chatHistory) => {
   try {
+    const messages = [
+      {
+        role: 'system',
+        content: `Tu es FitCoach, un coach expert en nutrition et sport. Tu poses des questions pour comprendre les objectifs et le profil utilisateur, puis tu génères un programme personnalisé. Ne redemande pas les infos déjà données.`,
+      },
+      ...chatHistory.map((msg) => ({
+        role: msg.type === 'user' ? 'user' : 'assistant',
+        content: msg.text,
+      })),
+      {
+        role: 'user',
+        content: userMessage,
+      }
+    ];
+
     const response = await fetch("/api/openai", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({
-        messages: [
-         {
-            role: "user",
-            content: userMessage
-          }
-        ]
-      })
+      body: JSON.stringify({ messages })
+      
     });
+    if (!response.ok) {
+  throw new Error(`Erreur API: ${response.status}`);
+}
 
     const data = await response.json();
     return data.choices?.[0]?.message?.content || "Désolé, je n'ai pas bien compris.";
@@ -24,8 +36,6 @@ const callOpenAI = async (userMessage) => {
     return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
   }
 };
-
-
 
 const FitnessCoachBot = () => {
   const [messages, setMessages] = useState([
@@ -43,10 +53,13 @@ const FitnessCoachBot = () => {
   });
   const [currentStep, setCurrentStep] = useState('name');
   const [isTyping, setIsTyping] = useState(false);
-  const [theme, setTheme] = useState(localStorage.getItem('fitcoach_theme') || 'light');
+  const [theme, setTheme] = useState('light');
+
+useEffect(() => {
+  const savedTheme = localStorage.getItem('fitcoach_theme');
+  if (savedTheme) setTheme(savedTheme);
+}, []);
   const [isGenerating, setIsGenerating] = useState(false);
-
-
 
   const messagesEndRef = useRef(null);
   const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -69,38 +82,29 @@ const FitnessCoachBot = () => {
       addMessage(text, 'bot');
     }, 1000);
   };
+
 // Sauvegarde dans localStorage à chaque changement
+// Au lieu de 4 useEffect séparés, un seul :
 useEffect(() => {
-  localStorage.setItem('fitcoach_messages', JSON.stringify(messages));
-}, [messages]);
-
-useEffect(() => {
-  localStorage.setItem('fitcoach_theme', theme);
-}, [theme]);
-
+  localStorage.setItem('fitcoach_data', JSON.stringify({
+    messages, userProfile, currentStep, theme
+  }));
+}, [messages, userProfile, currentStep, theme]);
 
 useEffect(() => {
-  localStorage.setItem('fitcoach_userProfile', JSON.stringify(userProfile));
-}, [userProfile]);
-
-useEffect(() => {
-  localStorage.setItem('fitcoach_currentStep', currentStep);
-}, [currentStep]);
-
-useEffect(() => {
-  const savedMessages = localStorage.getItem('fitcoach_messages');
-  const savedProfile = localStorage.getItem('fitcoach_userProfile');
-  const savedStep = localStorage.getItem('fitcoach_currentStep');
-
-  if (savedMessages && savedProfile && savedStep) {
-    setMessages(JSON.parse(savedMessages));
-    setUserProfile(JSON.parse(savedProfile));
-    setCurrentStep(savedStep);
+  const savedData = localStorage.getItem('fitcoach_data');
+  if (savedData) {
+    const { messages: savedMessages, userProfile: savedProfile, currentStep: savedStep, theme: savedTheme } = JSON.parse(savedData);
+    if (savedMessages) setMessages(savedMessages);
+    if (savedProfile) setUserProfile(savedProfile);
+    if (savedStep) setCurrentStep(savedStep);
+    if (savedTheme) setTheme(savedTheme);
   }
 }, []);
 
 
 const generateAIPersonalPlan = async () => {
+  if (isGenerating) return;
   setIsGenerating(true); // on démarre le chargement
 
   const { name, age, gender, weight, height, lifestyle } = userProfile;
@@ -226,7 +230,7 @@ if (/bitch|pute|enculé|merde|fuck/i.test(lowerMessage)) {
 
     case 'goals':
       const goals = message.split(',').map(g => g.trim().toLowerCase()).filter(Boolean);
-      if (goals.length === 0) {
+      if (goals.length === 0 || goals.some(g => g.length < 2)) {
         addBotMessage("Tu peux lister un ou plusieurs objectifs, séparés par des virgules.");
         return;
       }
