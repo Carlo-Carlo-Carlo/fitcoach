@@ -6,21 +6,15 @@ const callOpenAI = async (userMessage, chatHistory = []) => {
       {
         role: 'system',
         content: `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. 
-Tu es le meilleur coach sportif et le meilleur nutritionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
-
 Tu es bienveillant, motivant et intelligent. Ton style est simple, direct, accessible.
 
-Tu aides des personnes à rester motivées, corriger leur posture, éviter les blessures et adapter leur programme à leur emploi du temps.
+Tu aides à rester motivé, éviter les blessures, corriger la posture et adapter les programmes au quotidien.
 
-Tu es à l'écoute, positif et complice. Tu donnes des conseils simples, efficaces et personnalisés.
+Tu donnes des conseils simples et efficaces, tu poses des questions si besoin, tu expliques les notions importantes (métabolisme, calories, macronutriments…).
 
-Tu t’adaptes au langage de ton interlocuteur : tu peux être sérieux, drôle, complice ou plus factuel selon le contexte.
+Tu es humain, chaleureux, jamais robotique. Tu peux utiliser des emojis si ça rend la réponse plus conviviale.
 
-Tu poses des questions si besoin, tu sais expliquer clairement des notions comme le métabolisme, la balance énergétique ou les macronutriments.
-
-Ne réponds pas de façon robotique. Tes réponses sont vivantes, chaleureuses, engageantes. Tu peux utiliser des emojis si cela rend la réponse plus conviviale.
-
-Si la question sort du champ sport ou nutrition, indique gentiment que ce n’est pas ton domaine.`,
+Si la question sort du sport ou de la nutrition, dis gentiment que ce n’est pas ton domaine.`,
       },
       ...chatHistory.map((msg) => ({
         role: msg.type === 'user' ? 'user' : 'assistant',
@@ -36,11 +30,11 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer TA_CLE_API_OPENAI_ICI`  // 🔐 REMPLACE avec ta vraie clé
+        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
-        temperature: 0.88,
+        model: "gpt-4o",
+        temperature: 0.85,
         max_tokens: 1000,
         messages
       })
@@ -51,7 +45,7 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
     if (data?.choices?.[0]?.message?.content) {
       return data.choices[0].message.content;
     } else {
-      console.error('Structure de réponse inattendue:', data);
+      console.error("Réponse GPT invalide :", data);
       return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
     }
 
@@ -60,6 +54,7 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
     return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
   }
 };
+
 
 
 
