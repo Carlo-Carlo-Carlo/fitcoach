@@ -2,18 +2,16 @@ import React, { useState, useRef, useEffect } from 'react';
 
 const callOpenAI = async (userMessage) => {
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("/api/openai", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. Tu es le meilleur coach sportif et le meilleur nutrionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
+            content: `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. Tu es le meilleur coach sportif et le meilleur nutritionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
 
 Tu es bienveillant, motivant et intelligent. Ton style est simple, direct, accessible.
 
@@ -27,17 +25,14 @@ Tu poses des questions si besoin, tu sais expliquer clairement des notions comme
 
 Ne réponds pas de façon robotique. Tes réponses sont vivantes, chaleureuses, engageantes. Tu peux utiliser des emojis si cela rend la réponse plus conviviale.
 
-Si la question sort du champ sport ou nutrition, indique gentiment que ce n’est pas ton domaine.
-`,
+Si la question sort du champ sport ou nutrition, indique gentiment que ce n’est pas ton domaine.`
           },
           {
             role: "user",
-            content: userMessage,
-          },
-        ],
-        max_tokens: 900,
-        temperature: 0.88,
-      }),
+            content: userMessage
+          }
+        ]
+      })
     });
 
     const data = await response.json();
@@ -47,6 +42,7 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
     return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
   }
 };
+
 
 
 const FitnessCoachBot = () => {
