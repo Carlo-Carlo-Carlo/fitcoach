@@ -104,6 +104,10 @@ const generateAIPersonalPlan = async () => {
   setIsGenerating(true); // on démarre le chargement
 
   const { name, age, gender, weight, height, lifestyle } = userProfile;
+const experience = userProfile.experience || '';
+const timeAvailable = userProfile.timeAvailable || '';
+const goals = userProfile.goals || '';
+
 
   const userPrompt = `
 Voici les données de l'utilisateur :
