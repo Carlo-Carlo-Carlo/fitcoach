@@ -17,7 +17,7 @@ const callOpenAI = async (userMessage, chatHistory) => {
       }
     ];
 
-    const response = await fetch("/api/openai", {
+    const response = await fetch("https://fitcoach-kappa.vercel.app/api/openai", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
