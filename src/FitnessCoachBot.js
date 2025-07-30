@@ -32,20 +32,21 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
       }
     ];
 
-    const response = await fetch("https://fitcoach-kappa.vercel.app/api/openai", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        Authorization: `Bearer TA_CLE_API_OPENAI_ICI`  // 🔐 REMPLACE avec ta vraie clé
       },
-      body: JSON.stringify({ messages })
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        temperature: 0.88,
+        max_tokens: 1000,
+        messages
+      })
     });
 
-    if (!response.ok) {
-      throw new Error(`Erreur API: ${response.status}`);
-    }
-
     const data = await response.json();
-    console.log('Réponse complète OpenAI:', data);
 
     if (data?.choices?.[0]?.message?.content) {
       return data.choices[0].message.content;
@@ -59,6 +60,7 @@ Si la question sort du champ sport ou nutrition, indique gentiment que ce n’es
     return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
   }
 };
+
 
 
 const FitnessCoachBot = () => {
