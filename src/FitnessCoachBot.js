@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-const callOpenAI = async (userMessage, chatHistory) => {
+const callOpenAI = async (userMessage, chatHistory = []) => {
   try {
     const messages = [
       {
@@ -23,14 +23,22 @@ const callOpenAI = async (userMessage, chatHistory) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ messages })
-      
     });
+
     if (!response.ok) {
-  throw new Error(`Erreur API: ${response.status}`);
-}
+      throw new Error(`Erreur API: ${response.status}`);
+    }
 
     const data = await response.json();
-    return data.choices?.[0]?.message?.content || "Désolé, je n'ai pas bien compris.";
+       console.log('Réponse complète OpenAI:', data);
+    
+    if (data && data.choices && data.choices.length > 0 && data.choices[0].message) {
+      return data.choices[0].message.content || "Désolé, je n'ai pas bien compris.";
+    } else {
+      console.error('Structure de réponse inattendue:', data);
+      return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
+    }
+    
   } catch (error) {
     console.error("Erreur OpenAI :", error);
     return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
@@ -86,31 +94,59 @@ useEffect(() => {
 // Sauvegarde dans localStorage à chaque changement
 // Au lieu de 4 useEffect séparés, un seul :
 useEffect(() => {
-  localStorage.setItem('fitcoach_data', JSON.stringify({
+  saveToStorage('fitcoach_data', {
     messages, userProfile, currentStep, theme
-  }));
+  });
 }, [messages, userProfile, currentStep, theme]);
 
 useEffect(() => {
-  const savedData = localStorage.getItem('fitcoach_data');
+  const savedData = loadFromStorage('fitcoach_data');
   if (savedData) {
-    const { messages: savedMessages, userProfile: savedProfile, currentStep: savedStep, theme: savedTheme } = JSON.parse(savedData);
-    if (savedMessages) setMessages(savedMessages);
-    if (savedProfile) setUserProfile(savedProfile);
-    if (savedStep) setCurrentStep(savedStep);
-    if (savedTheme) setTheme(savedTheme);
+    const { 
+      messages: savedMessages, 
+      userProfile: savedProfile, 
+      currentStep: savedStep, 
+      theme: savedTheme 
+    } = savedData;
+    
+    if (savedMessages && Array.isArray(savedMessages)) setMessages(savedMessages);
+    if (savedProfile && typeof savedProfile === 'object') setUserProfile(savedProfile);
+    if (savedStep && typeof savedStep === 'string') setCurrentStep(savedStep);
+    if (savedTheme && typeof savedTheme === 'string') setTheme(savedTheme);
   }
 }, []);
 
+const saveToStorage = (key, data) => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.setItem(key, JSON.stringify(data));
+    }
+  } catch (error) {
+    console.warn('Erreur sauvegarde localStorage:', error);
+  }
+};
+
+const loadFromStorage = (key) => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const saved = localStorage.getItem(key);
+      return saved ? JSON.parse(saved) : null;
+    }
+  } catch (error) {
+    console.warn('Erreur lecture localStorage:', error);
+  }
+  return null;
+};
 
 const generateAIPersonalPlan = async () => {
   if (isGenerating) return;
   setIsGenerating(true); // on démarre le chargement
 
   const { name, age, gender, weight, height, lifestyle } = userProfile;
-const experience = userProfile.experience || '';
-const timeAvailable = userProfile.timeAvailable || '';
-const goals = userProfile.goals || '';
+  const experience = userProfile.experience || '';
+  const timeAvailable = userProfile.timeAvailable || '';
+  const goals = Array.isArray(userProfile.goals) ? userProfile.goals : [];
+
 
 
   const userPrompt = `
@@ -128,10 +164,15 @@ Voici les données de l'utilisateur :
 Propose un programme de remise en forme simple et adapté, avec des conseils de nutrition, sans jargon technique. Tu peux donner des encouragements aussi.
   `;
 
-  const aiResponse = await callOpenAI(userPrompt);
-  addBotMessage(aiResponse);
+  try {
+    const aiResponse = await callOpenAI(userPrompt, messages);
+    addBotMessage(aiResponse);
+  } catch (error) {
+    console.error('Erreur génération programme:', error);
+    addBotMessage("Désolé, je n'arrive pas à générer ton programme pour le moment. Réessaie dans un instant ! 💪");
+  }
 
-  setIsGenerating(false); // on arrête le chargement
+  setIsGenerating(false);
 };
 
 
@@ -381,8 +422,15 @@ Réponds comme un coach sportif bienveillant. Pose une question de suivi, donne 
       </div>
       <div style={{ textAlign: 'center', marginTop: '10px' }}>
   <button
-  onClick={() => {
-  localStorage.clear();
+onClick={() => {
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      localStorage.clear();
+    }
+  } catch (error) {
+    console.warn('Erreur nettoyage localStorage:', error);
+  }
+  
   setUserProfile({
     name: '', age: '', weight: '', height: '', gender: '', lifestyle: '', goals: [], experience: '', timeAvailable: ''
   });
