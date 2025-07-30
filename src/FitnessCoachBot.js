@@ -113,6 +113,9 @@ Voici les données de l'utilisateur :
 - poids : ${weight} kg
 - taille : ${height} cm
 - mode de vie : ${lifestyle}
+- niveau : ${experience}
+- temps dispo : ${timeAvailable}
+- objectifs : ${goals.join(', ')}
 
 Propose un programme de remise en forme simple et adapté, avec des conseils de nutrition, sans jargon technique. Tu peux donner des encouragements aussi.
   `;
