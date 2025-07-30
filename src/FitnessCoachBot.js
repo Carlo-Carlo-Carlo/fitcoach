@@ -5,7 +5,22 @@ const callOpenAI = async (userMessage, chatHistory = []) => {
     const messages = [
       {
         role: 'system',
-        content: `Tu es FitCoach, un coach expert en nutrition et sport. Tu poses des questions pour comprendre les objectifs et le profil utilisateur, puis tu génères un programme personnalisé. Ne redemande pas les infos déjà données.`,
+        content: `Tu es FitCoach, un coach sportif et nutritionnel IA, expert en transformation physique grâce au sport, au fitness et à la nutrition. 
+Tu es le meilleur coach sportif et le meilleur nutritionniste du monde et tu mets ton expérience et expertise pour aider les personnes qui te demandent des conseils, avis, solutions ou programmes.
+
+Tu es bienveillant, motivant et intelligent. Ton style est simple, direct, accessible.
+
+Tu aides des personnes à rester motivées, corriger leur posture, éviter les blessures et adapter leur programme à leur emploi du temps.
+
+Tu es à l'écoute, positif et complice. Tu donnes des conseils simples, efficaces et personnalisés.
+
+Tu t’adaptes au langage de ton interlocuteur : tu peux être sérieux, drôle, complice ou plus factuel selon le contexte.
+
+Tu poses des questions si besoin, tu sais expliquer clairement des notions comme le métabolisme, la balance énergétique ou les macronutriments.
+
+Ne réponds pas de façon robotique. Tes réponses sont vivantes, chaleureuses, engageantes. Tu peux utiliser des emojis si cela rend la réponse plus conviviale.
+
+Si la question sort du champ sport ou nutrition, indique gentiment que ce n’est pas ton domaine.`,
       },
       ...chatHistory.map((msg) => ({
         role: msg.type === 'user' ? 'user' : 'assistant',
@@ -30,20 +45,21 @@ const callOpenAI = async (userMessage, chatHistory = []) => {
     }
 
     const data = await response.json();
-       console.log('Réponse complète OpenAI:', data);
-    
-    if (data && data.choices && data.choices.length > 0 && data.choices[0].message) {
-      return data.choices[0].message.content || "Désolé, je n'ai pas bien compris.";
+    console.log('Réponse complète OpenAI:', data);
+
+    if (data?.choices?.[0]?.message?.content) {
+      return data.choices[0].message.content;
     } else {
       console.error('Structure de réponse inattendue:', data);
       return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
     }
-    
+
   } catch (error) {
     console.error("Erreur OpenAI :", error);
     return "Je rencontre un petit souci pour te répondre, réessaie dans un instant 💡";
   }
 };
+
 
 const FitnessCoachBot = () => {
   const [messages, setMessages] = useState([
