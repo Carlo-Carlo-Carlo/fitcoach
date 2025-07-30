@@ -1,5 +1,8 @@
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
+console.log('🚨 API APPELÉE - Début');
+  console.log('Method:', req.method);
+  console.log('Clé API:', process.env.OPENAI_API_KEY ? 'PRÉSENTE' : 'MANQUANTE');
+    if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Méthode non autorisée' });
   }
 
