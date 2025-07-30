@@ -263,33 +263,6 @@ Réponds comme un coach sportif bienveillant. Pose une question de suivi, donne 
     }
   };
 
-   const renderProfileCard = () => {
-    return (
-      <div style={{
-        backgroundColor: '#f9fafb',
-        border: '1px solid #e5e7eb',
-        borderRadius: '10px',
-        padding: '16px',
-        marginTop: '20px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-      }}>
-        <h3 style={{ marginBottom: '10px', fontWeight: 'bold', fontSize: '18px' }}>👤 Ton Profil</h3>
-        <ul style={{ lineHeight: '1.8', fontSize: '14px' }}>
-          <li><strong>Prénom :</strong> {userProfile.name}</li>
-          <li><strong>Âge :</strong> {userProfile.age} ans</li>
-          <li><strong>Sexe :</strong> {userProfile.gender}</li>
-          <li><strong>Taille :</strong> {userProfile.height} cm</li>
-          <li><strong>Poids :</strong> {userProfile.weight} kg</li>
-          <li><strong>Mode de vie :</strong> {userProfile.lifestyle}</li>
-          <li><strong>Niveau :</strong> {userProfile.experience}</li>
-          <li><strong>Temps dispo :</strong> {userProfile.timeAvailable}</li>
-          <li><strong>Objectifs :</strong> {userProfile.goals.join(', ')}</li>
-        </ul>
-      </div>
-    );
-  };
-
-
   return (
 <div
   className={`fitcoach-container ${theme === 'dark' ? 'dark' : 'light'}`}
@@ -471,8 +444,6 @@ Réponds comme un coach sportif bienveillant. Pose une question de suivi, donne 
     📋 Voir mon programme
   </button>
 </div>
-
-{currentStep === 'completed' && renderProfileCard()}
     </div>
     
   );
